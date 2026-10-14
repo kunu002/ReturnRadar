@@ -1,0 +1,32 @@
+# Manual build only: no repository trigger and no deployment step.
+steps:
+  - id: backend-checks
+    name: python:3.11-slim-bookworm
+    entrypoint: bash
+    args:
+      - -ceu
+      - |
+        pip install --no-cache-dir -r requirements-dev.txt
+        python scripts/check-deployment.py
+        python -m pytest -q
+    env:
+      - DEMO_MODE=false
+      - AUTH_PROVIDER=local
+      - STORAGE_BACKEND=sqlite
+      - DATABASE_PATH=/tmp/returnradar-build.db
+  - id: frontend-build
+    name: node:22-bookworm-slim
+    entrypoint: bash
+    args: [-ceu, 'npm ci && npm run build']
+    env: ['VITE_API_URL=']
+  - id: container-build
+    name: gcr.io/cloud-builders/docker
+    args: [build, --tag, '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/returnradar:$BUILD_ID', '.']
+images:
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/returnradar:$BUILD_ID'
+substitutions:
+  _REGION: asia-south1
+  _REPOSITORY: returnradar
+options:
+  logging: CLOUD_LOGGING_ONLY
+timeout: 1200s

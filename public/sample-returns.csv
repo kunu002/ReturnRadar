@@ -1,0 +1,6 @@
+id,product_id,product_name,variant_id,variant_name,order_id,order_item_id,return_id,refund_id,reason,returned_at,status
+csv-item-001,csv-pack,CSV Everyday Backpack,csv-olive,Olive,csv-order-001,csv-line-001,csv-return-001,,Laptop does not fit with its sleeve,2026-10-01T12:00:00+00:00,received
+csv-item-002,csv-pack,CSV Everyday Backpack,csv-olive,Olive,csv-order-002,csv-line-002,csv-return-002,,Laptop compartment is too narrow,2026-10-02T12:00:00+00:00,received
+csv-item-003,csv-pack,CSV Everyday Backpack,csv-olive,Olive,csv-order-003,csv-line-003,csv-return-003,,My laptop is too wide for the bag,2026-10-02T13:00:00+00:00,received
+csv-item-004,csv-pack,CSV Everyday Backpack,csv-olive,Olive,csv-order-004,csv-line-004,csv-return-004,,The sleeve does not fit in the compartment,2026-10-03T10:00:00+00:00,received
+csv-item-005,csv-pack,CSV Everyday Backpack,csv-olive,Olive,csv-order-005,csv-line-005,csv-return-005,,Laptop compartment smaller than expected,2026-10-03T11:00:00+00:00,received

@@ -1,0 +1,38 @@
+import {test,expect} from '@playwright/test';
+
+test('product review records an applied change and saves a functional outcome',async({page})=>{
+ await page.addInitScript(()=>sessionStorage.setItem('rr_demo','true'));
+ await page.setViewportSize({width:1440,height:1100});
+ await page.goto('/');
+ await page.getByRole('button',{name:'Product Reviews',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Turn feedback into fewer returns.'})).toBeVisible();
+ await page.getByRole('button',{name:'Plan a product review',exact:true}).first().click();
+ const form=page.getByRole('dialog');
+ await form.getByLabel('Issue to reduce',{exact:true}).fill('Size and fit');
+ await form.getByRole('textbox',{name:'Review goal'}).fill('Reduce complaints about choosing the wrong size.');
+ await form.getByRole('textbox',{name:'Planned change'}).fill('Add verified measurements and a clear sizing guide.');
+ await form.getByRole('button',{name:'Save review plan'}).click();
+ await expect(form).not.toBeVisible();
+ const cycle=page.locator('.review-cycle').filter({hasText:'Reduce complaints about choosing the wrong size.'});
+ await expect(cycle.getByText('Planned',{exact:true})).toBeVisible();
+ await cycle.getByRole('button',{name:'Record change applied'}).click();
+ const decision=page.getByRole('dialog');
+ await expect(decision.getByRole('button',{name:'Start feedback review'})).toBeDisabled();
+ await decision.getByRole('checkbox').check();
+ await decision.getByRole('button',{name:'Start feedback review'}).click();
+ await expect(decision).not.toBeVisible();
+ await expect(cycle.getByText('In progress',{exact:true})).toBeVisible();
+ await expect(cycle.getByText('Collecting purchases after the change',{exact:true})).toBeVisible();
+ await page.screenshot({path:'artifacts/reviews-desktop.png',fullPage:true,animations:'disabled'});
+ await page.setViewportSize({width:390,height:844});
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth)).toBe(false);
+ await page.screenshot({path:'artifacts/reviews-mobile.png',fullPage:true,animations:'disabled'});
+ await cycle.getByRole('button',{name:'Review results'}).click();
+ await decision.getByRole('radio',{name:/Keep the change/}).check();
+ await decision.getByRole('textbox',{name:'Review outcome'}).fill('The sizing guide is updated. Keep monitoring because fresh feedback is still limited.');
+ await decision.getByRole('button',{name:'Save completed review'}).click();
+ await expect(decision).not.toBeVisible();
+ await page.getByRole('combobox',{name:'Review status'}).selectOption('completed');
+ await expect(cycle.getByText('Completed',{exact:true})).toBeVisible();
+ await expect(cycle.locator('.review-outcome').getByText('The sizing guide is updated. Keep monitoring because fresh feedback is still limited.')).toBeVisible();
+});

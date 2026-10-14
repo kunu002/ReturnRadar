@@ -1,0 +1,18 @@
+{
+  "firestore": {"rules": "firestore.rules"},
+  "hosting": {
+    "public": "dist",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      {"source": "/api/**", "run": {"serviceId": "returnradar-api", "region": "asia-south1", "pinTag": true}},
+      {"source": "**", "destination": "/index.html"}
+    ],
+    "headers": [
+      {"source": "**", "headers": [{"key": "X-Content-Type-Options", "value": "nosniff"}, {"key": "Referrer-Policy", "value": "strict-origin-when-cross-origin"}, {"key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()"}]},
+      {"source": "/api/**", "headers": [{"key": "Cache-Control", "value": "private,no-store,max-age=0"}]},
+      {"source": "/", "headers": [{"key": "Cache-Control", "value": "no-cache"}, {"key": "X-Frame-Options", "value": "SAMEORIGIN"}]},
+      {"source": "/index.html", "headers": [{"key": "Cache-Control", "value": "no-cache"}, {"key": "X-Frame-Options", "value": "SAMEORIGIN"}]},
+      {"source": "/assets/**", "headers": [{"key": "Cache-Control", "value": "public,max-age=31536000,immutable"}]}
+    ]
+  }
+}

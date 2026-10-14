@@ -1,0 +1,38 @@
+import {test,expect} from '@playwright/test';
+
+test('a merchant verifies a shoe guide before it becomes available to buyers',async({page})=>{
+ await page.goto('/');
+ await page.getByRole('button',{name:'Create account',exact:true}).click();
+ await page.getByRole('radio',{name:/Start my workspace/}).check();
+ await page.getByLabel('Your name',{exact:true}).fill('Guide merchant');
+ await page.getByLabel('Merchant workspace name').fill('Shoe Guide Store');
+ await page.getByLabel('Email address',{exact:true}).fill(`shoe-guide-${Date.now()}@example.com`);
+ await page.getByLabel('Password',{exact:true}).fill('Guide123!');
+ await page.getByRole('button',{name:'Create workspace',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'A clearer picture of your returns.'})).toBeVisible();
+ await page.getByRole('button',{name:'Import CSV',exact:true}).click();
+ const header='id,product_id,product_name,variant_id,order_id,order_item_id,return_id,reason,returned_at,status\n';
+ const rows=Array.from({length:5},(_,index)=>`shoe-return-${index},csv-shoes,Everyday Running Shoes,shoe-size-8,shoe-order-${index},shoe-line-${index},shoe-request-${index},These shoes are too small,${new Date().toISOString()},received`).join('\n');
+ await page.getByLabel('Choose CSV file').setInputFiles({name:'shoe-returns.csv',mimeType:'text/csv',buffer:Buffer.from(header+rows+'\n')});
+ await page.getByRole('button',{name:'Import returns',exact:true}).click();
+ await expect(page.getByRole('dialog')).not.toBeVisible();
+ await page.getByRole('button',{name:'Run analysis',exact:true}).click();
+ await expect(page.getByRole('button',{name:'Run analysis',exact:true})).toBeEnabled({timeout:15000});
+ await page.getByRole('button',{name:'Products',exact:true}).click();
+ await page.getByRole('button',{name:'Propose actions',exact:true}).click();
+ await page.getByRole('combobox',{name:'Action type',exact:true}).selectOption('buyer_guide:footwear');
+ await page.getByRole('button',{name:'Review action',exact:true}).click();
+ const form=page.getByRole('dialog');
+ await expect(form.getByLabel('Buyer checklist',{exact:true})).toBeVisible();
+ await expect(form.getByRole('button',{name:'Approve & publish',exact:true})).toBeDisabled();
+ await form.getByRole('checkbox').check();
+ await form.getByRole('button',{name:'Approve & publish',exact:true}).click();
+ await expect(form).not.toBeVisible();
+ await page.getByRole('tab',{name:'Approved',exact:true}).click();
+ const preview=page.waitForEvent('popup');
+ await page.getByRole('link',{name:'Preview',exact:false}).click();
+ const buyer=await preview;
+ await expect(buyer.getByRole('heading',{name:'Choose a suitable shoe size',exact:true})).toBeVisible();
+ await expect(buyer.getByRole('checkbox')).toHaveCount(3);
+ await expect(buyer.getByRole('spinbutton')).toHaveCount(0);
+});

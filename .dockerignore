@@ -1,0 +1,13 @@
+# Allow only runtime source into the container build context.
+**
+!Dockerfile
+!.dockerignore
+!requirements.lock
+!backend/
+!backend/**
+backend/**/__pycache__/
+backend/**/*.pyc
+backend/**/.env*
+backend/**/*.key
+backend/**/*.pem
+backend/**/*.db
